@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<aiml version="2.0">
+    <!-- Стандартные шаблоны -->
+    <category>
+        <pattern>LOAD AIML</pattern>
+        <template>
+            <learn>aiml/*.aiml</learn>
+        </template>
+    </category>
+
+    <!-- Приветствия -->
+    <category>
+        <pattern>П Р И В Е Т</pattern>
+        <template>
+            Привет! Как я могу вам помочь?
+        </template>
+    </category>
+
+    <category>
+        <pattern>HELLO</pattern>
+        <template>
+            Hello! How can I help you?
+        </template>
+    </category>
+
+    <!-- Прощания -->
+    <category>
+        <pattern>П О К А</pattern>
+        <template>
+            До свидания! Возвращайтесь снова.
+        </template>
+    </category>
+
+     <!-- Прощания -->
+    <category>
+        <pattern>Д О С В И Д А Н И Я</pattern>
+        <template>
+            До свидания! Возвращайтесь снова.
+        </template>
+    </category>
+
+    <category>
+        <pattern>BYE</pattern>
+        <template>
+            Goodbye! Come back again.
+        </template>
+    </category>
+
+    <!-- Игра -->
+    <category>
+        <pattern>И Г Р А Т Ь</pattern>
+        <template>
+            Хотите сыграть в игру "Угадай число"? Просто скажите "играть".
+        </template>
+    </category>
+
+    <category>
+        <pattern>* И Г Р А *</pattern>
+        <template>
+            Я могу предложить вам игру "Угадай число". Скажите "играть", чтобы начать.
+        </template>
+    </category>
+
+    <!-- Помощь -->
+    <category>
+        <pattern>П О М О Щ Ь</pattern>
+        <template>
+            Я могу ответить на ваши вопросы или сыграть с вами в игру. Просто спросите или скажите "играть".
+        </template>
+    </category>
+
+    <!-- Ответы по умолчанию -->
+    <category>
+        <pattern>*</pattern>
+        <template>
+            Извините, я не совсем понял ваш вопрос. Можете переформулировать?
+        </template>
+    </category>
+</aiml>

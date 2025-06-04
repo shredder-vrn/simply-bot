@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Чат-бот</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .chat-container {
+            max-width: 800px;
+            margin: 20px auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            overflow: hidden;
+            position: relative;
+        }
+        .chat-header {
+            background: #4CAF50;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            font-size: 20px;
+            position: relative;
+        }
+        .chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            padding: 15px;
+            background: #e5ddd5;
+        }
+        .message {
+            margin-bottom: 15px;
+            display: flex;
+            flex-direction: column;
+        }
+        .user-message {
+            align-items: flex-end;
+        }
+        .bot-message {
+            align-items: flex-start;
+        }
+        .message-bubble {
+            max-width: 70%;
+            padding: 10px 15px;
+            border-radius: 18px;
+            margin-bottom: 5px;
+            word-wrap: break-word;
+        }
+        .user-message .message-bubble {
+            background: #dcf8c6;
+            border-bottom-right-radius: 0;
+        }
+        .bot-message .message-bubble {
+            background: white;
+            border-bottom-left-radius: 0;
+        }
+        .message-time {
+            font-size: 11px;
+            color: #666;
+        }
+        .quick-replies {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        .quick-reply {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .quick-reply:hover {
+            background: #45a049;
+        }
+        .chat-input {
+            display: flex;
+            padding: 10px;
+            background: #eee;
+        }
+        #message-input {
+            flex: 1;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            outline: none;
+        }
+        #send-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 20px;
+            padding: 10px 20px;
+            margin-left: 10px;
+            cursor: pointer;
+        }
+        #send-button:hover {
+            background: #45a049;
+        }
+        .about-button {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: none;
+            border-radius: 15px;
+            padding: 5px 10px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .about-button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.4);
+        }
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 500px;
+        }
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .close:hover {
+            color: black;
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            Чат-бот
+            <button class="about-button" id="about-button">Об авторе</button>
+        </div>
+        <div class="chat-messages" id="chat-messages">
+            <!-- Сообщения будут добавляться здесь -->
+        </div>
+        <div class="chat-input">
+            <input type="text" id="message-input" placeholder="Введите сообщение..." autocomplete="off">
+            <button id="send-button">Отправить</button>
+        </div>
+    </div>
+
+    <!-- Модальное окно "Об авторе" -->
+    <div id="about-modal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h2>Об авторе</h2>
+            <p>Этот чат-бот был создан в качестве демонстрационного проекта.</p>
+            <p>Бот использует технологию AIML для обработки естественного языка и может играть с вами в простые игры.</p>
+            <p>Для связи: <a href="https://e.mail.ru/compose/" target = '_self'>p_shcherbatov@mail.ru</a></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageInput = document.getElementById('message-input');
+            const sendButton = document.getElementById('send-button');
+            const aboutButton = document.getElementById('about-button');
+            const modal = document.getElementById('about-modal');
+            const closeButton = document.querySelector('.close');
+            const userId = 'user_' + Math.floor(Math.random() * 10000);
+
+            // Добавляем приветственное сообщение от бота
+            addBotMessage('Привет! Я ваш чат-бот. Чем могу помочь?', ['Играть', 'Помощь']);
+
+            // Обработчик нажатия кнопки отправки
+            sendButton.addEventListener('click', sendMessage);
+
+            // Обработчик нажатия Enter в поле ввода
+            messageInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+
+            // Обработчики для модального окна "Об авторе"
+            aboutButton.addEventListener('click', function() {
+                modal.style.display = 'block';
+            });
+
+            closeButton.addEventListener('click', function() {
+                modal.style.display = 'none';
+            });
+
+            window.addEventListener('click', function(event) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+
+            function sendMessage() {
+                const message = messageInput.value.trim();
+                if (message === '') return;
+
+                // Добавляем сообщение пользователя в чат
+                addUserMessage(message);
+                messageInput.value = '';
+
+                // Отправляем сообщение на сервер
+                fetch('/send_message', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        user_id: userId,
+                        message: message
+                    }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Добавляем ответ бота в чат
+                    addBotMessage(data.text, data.quick_replies);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    addBotMessage('Произошла ошибка при обработке вашего сообщения.');
+                });
+            }
+
+            function addUserMessage(text) {
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message user-message';
+
+                const bubble = document.createElement('div');
+                bubble.className = 'message-bubble';
+                bubble.textContent = text;
+
+                const time = document.createElement('div');
+                time.className = 'message-time';
+                time.textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+                messageElement.appendChild(bubble);
+                messageElement.appendChild(time);
+                chatMessages.appendChild(messageElement);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            function addBotMessage(text, quickReplies = []) {
+                const messageElement = document.createElement('div');
+                messageElement.className = 'message bot-message';
+
+                const bubble = document.createElement('div');
+                bubble.className = 'message-bubble';
+                bubble.textContent = text;
+
+                const time = document.createElement('div');
+                time.className = 'message-time';
+                time.textContent = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+
+                messageElement.appendChild(bubble);
+                messageElement.appendChild(time);
+
+                if (quickReplies && quickReplies.length > 0) {
+                    const repliesContainer = document.createElement('div');
+                    repliesContainer.className = 'quick-replies';
+
+                    quickReplies.forEach(reply => {
+                        const replyButton = document.createElement('button');
+                        replyButton.className = 'quick-reply';
+                        replyButton.textContent = reply;
+                        replyButton.addEventListener('click', () => {
+                            messageInput.value = reply;
+                            sendMessage();
+                        });
+                        repliesContainer.appendChild(replyButton);
+                    });
+
+                    messageElement.appendChild(repliesContainer);
+                }
+
+                chatMessages.appendChild(messageElement);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+        });
+    </script>
+</body>
+</html>
